@@ -11,14 +11,14 @@ class App {
   public app: Application;
 
   //declaring our controller
-  public miniController: Controller;
+  public mainController: Controller;
 
   constructor() {
     this.app = express();
     this.setConfig();
 
     //Creating and assigning a new instance of our controller
-    this.miniController = new Controller(this.app);
+    this.mainController = new Controller(this.app);
   }
 
   private setConfig() {
