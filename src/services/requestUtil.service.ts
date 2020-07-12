@@ -1,4 +1,4 @@
-//src/services/requestChecker.service.ts
+//src/services/requestUtil.service.ts
 
 type CheckResult = {
   ok: boolean;
@@ -7,7 +7,7 @@ type CheckResult = {
 };
 
 export default class RequestUtil {
-  public checkFields(required: string[], reqBody: string[]): CheckResult {
+  static checkFields(required: string[], reqBody: string[]): CheckResult {
     // Creating a table for missing or too many fields
     const miss: string[] = [];
     const extra: string[] = [];
@@ -36,7 +36,7 @@ export default class RequestUtil {
     };
   }
 
-  public apiSuccessResponse(
+  static apiSuccessResponse(
     message: string,
     data: Record<string, unknown> | null = null
   ): Record<string, unknown> {
@@ -54,7 +54,7 @@ export default class RequestUtil {
     }
   }
 
-  public apiErrorResponse(
+  static apiErrorResponse(
     message: string,
     error = "An error has occurred"
   ): Record<string, unknown> {
@@ -64,14 +64,14 @@ export default class RequestUtil {
     };
   }
 
-  public apiFieldsErrorReponse(
+  static apiFieldsErrorReponse(
     miss: Array<string>,
     extra: Array<string>
   ): Record<string, unknown> {
     return {
-      ...this.apiErrorResponse('Missing parameters'),
+      ...RequestUtil.apiErrorResponse("Missing parameters"),
       miss,
-      extra
-    }
+      extra,
+    };
   }
 }

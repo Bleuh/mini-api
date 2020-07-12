@@ -10,12 +10,6 @@ import { IUser } from "../database/users/users.types";
 import RequestUtil from "./requestUtil.service";
 
 export class AuthService {
-  private reqUtil: RequestUtil;
-
-  constructor() {
-    this.reqUtil = new RequestUtil();
-  }
-
   public requireJWTAuthentication(): jwt.RequestHandler {
     return jwt({
       secret: ACCESS_TOKEN_SECRET,
@@ -24,56 +18,78 @@ export class AuthService {
   }
 
   public async register(req: Request, res: Response): Promise<Response> {
-    const { miss, extra, ok } = this.reqUtil.checkFields(
+    const { miss, extra, ok } = RequestUtil.checkFields(
       ["login", "password"],
       Object.entries(req.body).length !== 0 ? Object.keys(req.body) : []
     );
     if (!ok) {
       return res
         .status(400)
-        .json(this.reqUtil.apiFieldsErrorReponse(miss, extra));
+        .json(RequestUtil.apiFieldsErrorReponse(miss, extra));
     }
+    const login: string = req.body.login;
+    const password: string = req.body.password;
     try {
-      const user: IUser | null = await User.findOne(
-        { login: req.body.login }
-      ).exec();
+      const user: IUser | null = await User.findOne({
+        login,
+      }).exec();
       if (user) {
-        return res.status(409).json(this.reqUtil.apiErrorResponse("User already exist"));
+        return res
+          .status(409)
+          .json(RequestUtil.apiErrorResponse("User already exist."));
       }
-      try {
-        const user: IUser = await User.create({login: req.body.login, password: req.body.password});
-        return res.status(201).json(this.reqUtil.apiSuccessResponse("User successully created", user.toJSON()));
-      } catch (err) {
-        return res.status(404).json(this.reqUtil.apiErrorResponse('User can not be create.'));
-      }
-    } catch (err) {
-      return res.status(404).json(this.reqUtil.apiErrorResponse('User can not be create.'));
+      const newUser: IUser = await User.create({
+        login,
+        password,
+      });
+      return res
+        .status(201)
+        .json(
+          RequestUtil.apiSuccessResponse("User successfully created.", {
+            ...newUser.toJSON(),
+            password: "",
+          })
+        );
+    } catch (error) {
+      return res
+        .status(500)
+        .json(RequestUtil.apiErrorResponse("User cannot be created.", error));
     }
   }
 
   public async login(req: Request, res: Response): Promise<Response> {
-    const { miss, extra, ok } = this.reqUtil.checkFields(
+    const { miss, extra, ok } = RequestUtil.checkFields(
       ["login", "password"],
       Object.entries(req.body).length !== 0 ? Object.keys(req.body) : []
     );
     if (!ok) {
       return res
         .status(400)
-        .json(this.reqUtil.apiFieldsErrorReponse(miss, extra));
+        .json(RequestUtil.apiFieldsErrorReponse(miss, extra));
     }
+    const login: string = req.body.login;
+    const password: string = req.body.password;
     try {
-      const user: IUser | null = await User.findOne(
-        { login: req.body.login, password: req.body.password }
-      ).exec();
+      const user: IUser | null = await User.findOne({
+        login,
+        password,
+      }).exec();
       if (user) {
-        const accessToken = jsonwebtoken.sign({ id: user.id }, ACCESS_TOKEN_SECRET);
-        return res.status(200).json(this.reqUtil.apiSuccessResponse("User find", {accessToken}));
+        const accessToken = jsonwebtoken.sign(
+          { id: user.id },
+          ACCESS_TOKEN_SECRET
+        );
+        return res
+          .status(200)
+          .json(RequestUtil.apiSuccessResponse("User found.", { accessToken }));
       }
-      else {
-        return res.status(404).json(this.reqUtil.apiErrorResponse('User not be find.'));
-      }
+      return res
+        .status(404)
+        .json(RequestUtil.apiErrorResponse("User not found."));
     } catch (error) {
-      return res.status(404).json(this.reqUtil.apiErrorResponse('User can not be find.'));
+      return res
+        .status(500)
+        .json(RequestUtil.apiErrorResponse("User cannot be found.", error));
     }
   }
 }

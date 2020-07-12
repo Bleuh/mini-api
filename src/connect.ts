@@ -1,3 +1,5 @@
+//src/connect.ts
+
 import mongoose from "mongoose";
 
 type TInput = {
@@ -10,7 +12,7 @@ const options = {
   connectTimeoutMS: 10000,
 };
 
-export default ({ db }: TInput) => {
+export default ({ db }: TInput): void => {
   const connect = () => {
     mongoose
       .connect(db, options)
