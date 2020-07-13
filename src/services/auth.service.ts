@@ -3,6 +3,8 @@
 import { Request, Response } from "express";
 import jwt from "express-jwt";
 import jsonwebtoken from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+
 import { ACCESS_TOKEN_SECRET } from "../constants/miniApi.constants";
 
 import User from "../database/users/users.model";
@@ -28,7 +30,7 @@ export class AuthService {
         .json(RequestUtil.apiFieldsErrorReponse(miss, extra));
     }
     const login: string = req.body.login;
-    const password: string = req.body.password;
+    const password: string = bcrypt.hashSync(req.body.password, 10);
     try {
       const user: IUser | null = await User.findOne({
         login,
@@ -45,10 +47,7 @@ export class AuthService {
       return res
         .status(201)
         .json(
-          RequestUtil.apiSuccessResponse("User successfully created.", {
-            ...newUser.toJSON(),
-            password: "",
-          })
+          RequestUtil.apiSuccessResponse("User successfully created.", newUser.toJSON())
         );
     } catch (error) {
       return res
@@ -72,9 +71,13 @@ export class AuthService {
     try {
       const user: IUser | null = await User.findOne({
         login,
-        password,
       }).exec();
       if (user) {
+        if (!bcrypt.compareSync(password, user.password)) {
+          return res
+            .status(400)
+            .json(RequestUtil.apiErrorResponse("Wrong password."));
+        }
         const accessToken = jsonwebtoken.sign(
           { id: user.id },
           ACCESS_TOKEN_SECRET
