@@ -14,8 +14,6 @@ The main purpose of the api is to manage orders from users.
 
 ## Features
 
----
-
 ### User
 
 - [Register/Login](#register/login)
@@ -30,8 +28,6 @@ The main purpose of the api is to manage orders from users.
 - [Update orders status](#update-orders-status)
 
 ## How to launch
-
----
 
 ```bash
 # Clone the project
@@ -56,15 +52,11 @@ You can now use the api on `http://localhost:3000/`
 
 ## Routes available
 
----
-
 I will show you here some example for each route
 
 > /
 
 This route gives you all routes available
-
----
 
 ### Register/Login
 
@@ -154,8 +146,6 @@ curl --location --request GET 'localhost:3000/factory/order/update-status' \
 Status is tested and can only be : "Pending", "Production", "Complete" or "Shipped"
 
 ## Improvement needed
-
----
 
 ### Unit test
 
