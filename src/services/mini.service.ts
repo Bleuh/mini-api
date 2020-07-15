@@ -1,6 +1,6 @@
 //src/services/mini.service.ts
 
-import { Request, Response } from "express";
+import { Request, Response, Express } from "express";
 import User from "../database/users/users.model";
 import Order from "../database/orders/orders.model";
 import RequestUtil from "./requestUtil.service";
@@ -16,7 +16,7 @@ type requestOrders = {
 
 export class MiniService {
   public endPointsList(req: Request, res: Response): Response {
-    return res.status(200).json(getEndpoints(req.app));
+    return res.status(200).json(getEndpoints(<Express>req.app));
   }
 
   public async getOrders(req: Request, res: Response): Promise<Response> {

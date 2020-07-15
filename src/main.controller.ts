@@ -1,6 +1,6 @@
 //src/main.controller.ts
 
-import { Application } from "express";
+import { Application, Response, Request, NextFunction, Errback } from "express";
 import { MiniService } from "./services/mini.service";
 import { AuthService } from "./services/auth.service";
 import { FactoryService } from "./services/factory.service";
@@ -32,7 +32,18 @@ export class Controller {
       .post((req, res) => this.authService.login(req, res));
 
     //Middleware user auth
-    this.app.use("/order/*", this.authService.requireJWTAuthentication());
+    this.app.use(
+      "/order/*",
+      this.authService.requireJWTAuthentication(),
+      (err: Errback, req: Request, res: Response, next: NextFunction) => {
+        if (err.name === "UnauthorizedError") {
+          res
+            .status(401)
+            .json({ message: "Unauthorized. Invalid or missing token!" });
+        }
+        next('route');
+      }
+    );
 
     //User routes
     this.app
